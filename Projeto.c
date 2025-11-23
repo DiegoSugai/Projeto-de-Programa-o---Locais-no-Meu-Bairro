@@ -13,48 +13,39 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <memory.h>
-#include <string.h> // Necessário para strcmp
+#include <string.h>
 
 #define BRANCO 0
 #define CINZA  1
 #define PRETO  2
 
-/*
- * Estrutura de dados para representar grafos
- */
-typedef struct a{ /* Celula de uma lista de arestas */
+ //Estrutura de dados para representar grafos
+typedef struct a{ // Celula de uma lista de arestas
     int    extremo2;
-    int    peso;     // Na Parte 2, 'peso' é a distância em METROS
+    int    peso;     // Distancia em metros
     struct a *prox;
 } Arest;
 
-typedef struct v{  /* Cada vertice tem um ponteiro para uma lista de arestas incidentes nele */
+typedef struct v{  // Cada vertice tem um ponteiro para uma lista de arestas incidentes nele
     int nome;
     int cor;
     Arest *prim;
 } Vert;
 
-// --- PARTE 2 ---
-// Estrutura de Localidades atualizada conforme requisito do PDF
+// Estrutura de Localidades
 typedef struct {
-    const char* nome; // Nome do local, ex: "Padaria"
+    const char* nome; // Nome do local
     int vert1;        // Um dos vértices da rua (esquina 1)
     int vert2;        // O outro vértice da rua (esquina 2)
     int dist_vert1;   // Distância em metros do local até o vert1
     int dist_vert2;   // Distância em metros do local até o vert2
 } Localidades;
 
-
-/*
- * Declarações das Funções
- */
 void criaGrafo(Vert **G, int ordem);
 void destroiGrafo(Vert **G, int ordem);
 int  acrescentaAresta(Vert G[], int ordem, int vert1, int vert2, int peso);
 void imprimeGrafo(Vert G[], int ordem);
 
-// --- PARTE 2 ---
-// Funções novas e modificadas para a Parte 2
 int calculaDistanciaModificado(Vert G[], int ordem, int origem, int destino, int **caminho_vertices, int *tamanho_caminho);
 int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades poi_B, int **melhor_caminho, int *tam_melhor_caminho);
 void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades locais[], int num_locais);
