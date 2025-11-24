@@ -7,9 +7,6 @@
  * Victor Maki tarcha - RA 10419861
  * Marcos Arambasic - RA 10443260
  *
- * Para compilar e rodar:
- * gcc Projeto.c -o programa -ansi -pedantic
- * ./programa
  */
 
 /* Bibliotecas */
