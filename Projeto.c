@@ -100,6 +100,7 @@ int acrescentaAresta(Vert G[], int ordem, int vert1, int vert2, int peso){
     A2->peso = peso;
     A2->prox = G[vert2].prim;
     G[vert2].prim = A2;
+    G[vert2].prim = A2;
     return 1;
 }
 
@@ -107,12 +108,12 @@ void imprimeGrafo(Vert G[], int ordem){
     int i;
     Arest *aux;
     printf("\nOrdem:    %d",ordem);
-    printf("\nLista de Adjacencia:\n");
+    printf("\nLista de Adjacencia (Formato: Vizinho(distancia)):\n");
     for (i=0; i<ordem; i++){
         printf("\n    v%d: ", i); 
         aux = G[i].prim;
         for( ; aux != NULL; aux = aux->prox)
-            printf("  v%d(dist:%dm)", aux->extremo2, aux->peso); // Atualizado para 'm' (metros)
+            printf("  v%d(%dm)", aux->extremo2, aux->peso); // Atualizado para 'm' (metros)
     }
     printf("\n\n");
 }
@@ -623,6 +624,7 @@ int main(int argc, char *argv[]) {
         
         printf("(1) Localizacao de minha casa\n");
         printf("(2) Calcular passeio (PARTE 2)\n");
+        printf("(3) Imprimir Grafo Completo\n"); // <--- NOVA OPÇÃO AQUI
         printf("(0) Fechar programa\n\n");
         
         printf("Digite uma opcao: ");
@@ -637,6 +639,16 @@ int main(int argc, char *argv[]) {
         else if(escolha == 2){
             // Chama a função principal da Parte 2
             calcularPasseio(G, ordemG, minha_casa, locais, num_locais);
+            
+            printf("\nPressione enter para voltar ao menu principal...");
+            while (getchar() != '\n'); // Limpa o buffer de entrada
+            getchar(); // Espera o enter
+        }
+
+        else if (escolha == 3) { // <--- LÓGICA DA NOVA OPÇÃO AQUI
+            printf("\n--- Estrutura do Grafo (Lista de Adjacencia) ---\n");
+            imprimeGrafo(G, ordemG);
+            printf("------------------------------------------------\n");
             
             printf("\nPressione enter para voltar ao menu principal...");
             while (getchar() != '\n'); // Limpa o buffer de entrada
