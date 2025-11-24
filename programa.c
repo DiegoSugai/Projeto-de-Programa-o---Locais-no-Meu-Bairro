@@ -6,10 +6,6 @@
  * Kaue Henrique Matias Alves - RA: 10417894
  * Victor Maki tarcha - RA 10419861
  * Marcos Arambasic - RA 10443260
- *
- * Para compilar e rodar:
- * gcc programa.c -o programa -ansi -pedantic
- * ./programa
  */
 
 /* Bibliotecas */
@@ -58,9 +54,7 @@ int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades po
 void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades locais[], int num_locais);
 void encontrarPOIsNoCaminho(int v1, int v2, Localidades locais_todos[], int num_locais_todos, const char* nome_destino, int modo);
 
-/*
- * Implementacao das Funcoes Basicas de Grafo
- */
+/* Implementacao das Funcoes Basicas de Grafo */
 
 void criaGrafo(Vert **G, int ordem){
     int i;
@@ -239,6 +233,7 @@ void inicializarMapa(Vert *G, int ordemG) {
     acrescentaAresta(G, ordemG, 27, 39, 165); 
     acrescentaAresta(G, ordemG, 39, 48, 165);
 
+    /* Função para adicionar os locais no grafo */
     adicionarLocalNaAresta(G, 1, 2, "Ecully Charbon");
     adicionarLocalNaAresta(G, 2, 3, "Tapecaria Renova");
     adicionarLocalNaAresta(G, 5, 6, "Gelato Borelli");
