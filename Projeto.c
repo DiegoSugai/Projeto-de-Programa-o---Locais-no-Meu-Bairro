@@ -1,15 +1,21 @@
-/*
+/* ----------------------------------------------
+ * 
  * PROJETO DE TEORIA DOS GRAFOS - PARTE 2
  * MODELAGEM DE BAIRRO E CALCULO DE PASSEIO
- *
+ * 
+ * ----------------------------------------------
  * Diego Spagnuolo Sugai - RA 10417329
  * Kaue Henrique Matias Alves - RA: 10417894
  * Victor Maki tarcha - RA 10419861
  * Marcos Arambasic - RA 10443260
- * * Para compilar e rodar:
+ * ----------------------------------------------
+ * 
+ * INSTRUCOES PARA COMPILAR E RODAR (Ambiente Linux / WSL):
  * gcc Projeto.c -o programa -ansi -pedantic
  * ./programa
- * */
+ * 
+ * ----------------------------------------------
+ */
 
 /* Bibliotecas */
 #include <stdio.h>
@@ -43,7 +49,7 @@ typedef struct {
     int dist_vert2;   /* Distancia em metros do local ate o vert2 */
 } Localidades;
 
-/* Prototipos */
+/* Prototipos das Funcoes */
 void criaGrafo(Vert **G, int ordem);
 void destroiGrafo(Vert **G, int ordem);
 int  acrescentaAresta(Vert G[], int ordem, int vert1, int vert2, int peso);
@@ -52,11 +58,10 @@ void imprimeGrafo(Vert G[], int ordem);
 int calculaDistanciaModificado(Vert G[], int ordem, int origem, int destino, int **caminho_vertices, int *tamanho_caminho);
 int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades poi_B, int **melhor_caminho, int *tam_melhor_caminho);
 void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades locais[], int num_locais);
-/* Funcao auxiliar agora aceita o 'modo' para saber como imprimir */
 void encontrarPOIsNoCaminho(int v1, int v2, Localidades locais_todos[], int num_locais_todos, const char* nome_destino, int modo);
 
 /*
- * Implementacao das Funcoes (Basicas)
+ * Implementacao das Funcoes Basicas de Grafo
  */
 
 void criaGrafo(Vert **G, int ordem){
@@ -115,25 +120,24 @@ void imprimeGrafo(Vert G[], int ordem){
     printf("\nOrdem:   %d",ordem);
     printf("\nLista de Adjacencia:\n");
 
-    for (i=0; i<ordem; i++){
+    for (i=0; i<ordem-1; i++){
         printf("\n    v%d: ", i);
         aux = G[i].prim;
         for( ; aux != NULL; aux = aux->prox) {
-            /* Formatacao de float para mostrar a distancia */
             printf("  v%d(%.2fm)", aux->extremo2, (float)aux->peso);
         }
     }
     printf("\n\n");
 }
 
-/* --- PARTE 2 --- */
-/* Dijkstra modificado para retornar o caminho (sequencia de vertices) e a distancia. */
+/* Algoritmo de Dijkstra modificado para retornar o caminho (sequencia de vertices) 
+ * junto da distancia minima
+ */
 int calculaDistanciaModificado(Vert G[], int ordem, int origem, int destino, int **caminho_vertices, int *tamanho_caminho) {
     int *dist = (int *) malloc(ordem * sizeof(int));
     int *visitado = (int *) malloc(ordem * sizeof(int));
     int *predecessor = (int *) malloc(ordem * sizeof(int)); 
     
-    /* Variaveis ANSI C (no topo) */
     int i, u, count;
     int min, min_index;
     int v, peso;
@@ -145,13 +149,12 @@ int calculaDistanciaModificado(Vert G[], int ordem, int origem, int destino, int
     for (i = 0; i < ordem; i++) {
         dist[i] = INT_MAX;
         visitado[i] = 0;
-        predecessor[i] = -1; /* -1 indica sem predecessor */
+        predecessor[i] = -1; 
     }
     
     dist[origem] = 0;
 
     for (count = 0; count < ordem; count++) {
-        
         min = INT_MAX; 
         min_index = -1;
         
@@ -167,7 +170,7 @@ int calculaDistanciaModificado(Vert G[], int ordem, int origem, int destino, int
         u = min_index;
         visitado[u] = 1;
         
-        if (u == destino) break; /* Encontrou o destino */
+        if (u == destino) break; 
         
         adj = G[u].prim;
         
@@ -177,7 +180,7 @@ int calculaDistanciaModificado(Vert G[], int ordem, int origem, int destino, int
 
             if (!visitado[v] && dist[u] != INT_MAX && dist[u] + peso < dist[v]) {
                 dist[v] = dist[u] + peso;
-                predecessor[v] = u; /* Guarda o predecessor */
+                predecessor[v] = u; 
             }
             adj = adj->prox;
         }
@@ -185,7 +188,7 @@ int calculaDistanciaModificado(Vert G[], int ordem, int origem, int destino, int
 
     distanciaFinal = dist[destino];
     
-    /* --- Reconstrucao do Caminho --- */
+    /* Reconstrucao do Caminho usando o array de predecessores */
     if (distanciaFinal != INT_MAX) {
         caminho_reverso = (int *) malloc(ordem * sizeof(int));
         atual = destino;
@@ -195,7 +198,6 @@ int calculaDistanciaModificado(Vert G[], int ordem, int origem, int destino, int
             atual = predecessor[atual];
         }
         
-        /* Inverte o caminho para ter a ordem correta (Origem -> Destino) */
         *caminho_vertices = (int *) malloc(tam * sizeof(int));
         for(i = 0; i < tam; i++) {
             (*caminho_vertices)[i] = caminho_reverso[tam - 1 - i];
@@ -215,16 +217,13 @@ int calculaDistanciaModificado(Vert G[], int ordem, int origem, int destino, int
     return distanciaFinal;
 }
 
-/* --- PARTE 2 --- */
 /*
- * Calcula a distancia real entre dois locais (POIs),
- * ja incluindo as distancias parciais nas ruas.
- * Testa as 4 combinacoes de vertices e retorna o menor caminho.
+ * Calcula a distancia real entre dois locais (POIs), considerando as 
+ * distancias parciais nas arestas. Testa as 4 combinacoes possiveis de entrada/saida.
  */
 int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades poi_B, int **melhor_caminho, int *tam_melhor_caminho) {
     
     int dist_total = INT_MAX;
-    /* Variaveis ANSI C (no topo) */
     int *caminho_atual = NULL;
     int tam_caminho_atual = 0;
     int dist_vA1_vB1, dist_c1;
@@ -232,12 +231,11 @@ int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades po
     int dist_vA2_vB1, dist_c3;
     int dist_vA2_vB2, dist_c4;
 
-    /* Libera o ponteiro *melhor_caminho* ANTES de usa-lo */
     if(*melhor_caminho) free(*melhor_caminho);
     *melhor_caminho = NULL; 
     *tam_melhor_caminho = 0;
 
-    /* --- Cenario 1: A(via vA1) -> ... -> B(via vB1) --- */
+    /* Cenario 1: Vertice 1 de A -> Vertice 1 de B */
     dist_vA1_vB1 = calculaDistanciaModificado(G, ordem, poi_A.vert1, poi_B.vert1, &caminho_atual, &tam_caminho_atual);
     if (dist_vA1_vB1 != INT_MAX) {
         dist_c1 = poi_A.dist_vert1 + dist_vA1_vB1 + poi_B.dist_vert1;
@@ -252,7 +250,7 @@ int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades po
     }
     caminho_atual = NULL;
 
-    /* --- Cenario 2: A(via vA1) -> ... -> B(via vB2) --- */
+    /* Cenario 2: Vertice 1 de A -> Vertice 2 de B */
     dist_vA1_vB2 = calculaDistanciaModificado(G, ordem, poi_A.vert1, poi_B.vert2, &caminho_atual, &tam_caminho_atual);
      if (dist_vA1_vB2 != INT_MAX) {
         dist_c2 = poi_A.dist_vert1 + dist_vA1_vB2 + poi_B.dist_vert2;
@@ -267,7 +265,7 @@ int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades po
     }
     caminho_atual = NULL;
 
-    /* --- Cenario 3: A(via vA2) -> ... -> B(via vB1) --- */
+    /* Cenario 3: Vertice 2 de A -> Vertice 1 de B */
     dist_vA2_vB1 = calculaDistanciaModificado(G, ordem, poi_A.vert2, poi_B.vert1, &caminho_atual, &tam_caminho_atual);
      if (dist_vA2_vB1 != INT_MAX) {
         dist_c3 = poi_A.dist_vert2 + dist_vA2_vB1 + poi_B.dist_vert1;
@@ -282,7 +280,7 @@ int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades po
     }
     caminho_atual = NULL;
 
-    /* --- Cenario 4: A(via vA2) -> ... -> B(via vB2) --- */
+    /* Cenario 4: Vertice 2 de A -> Vertice 2 de B */
     dist_vA2_vB2 = calculaDistanciaModificado(G, ordem, poi_A.vert2, poi_B.vert2, &caminho_atual, &tam_caminho_atual);
      if (dist_vA2_vB2 != INT_MAX) {
         dist_c4 = poi_A.dist_vert2 + dist_vA2_vB2 + poi_B.dist_vert2;
@@ -299,11 +297,12 @@ int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades po
     return dist_total;
 }
 
-/* --- PARTE 2 --- */
-/* Funcao para calcular o passeio (TSP) com MENUS de visualizacao e VALIDACAO */
+/* Funcao Principal da Parte 2:
+ * Calcula o passeio usando a Heuristica do Vizinho Mais Proximo (TSP).
+ * Dentro dele é possivel escolher entre duas versoes de visualizacao
+ */
 void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades locais[], int num_locais) {
     
-    /* Variaveis ANSI C (no topo) */
     int num_visita = num_locais + 1; 
     Localidades *conjunto_visita;
     int i, j, k;
@@ -325,22 +324,20 @@ void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades lo
     int dist_volta;
     int modo_exibicao;
 
-    /* Aloca memoria */
+    /* Aloca memoria para o conjunto de locais a visitar */
     conjunto_visita = (Localidades*) malloc(num_visita * sizeof(Localidades));
     if (conjunto_visita == NULL) {
         perror("Erro ao alocar memoria para conjunto_visita");
         return;
     }
 
-    /* Posicao 0 eh sempre "minha casa" */
     conjunto_visita[0] = minha_casa; 
     
-    /* Copia os locais */
     for(i = 0; i < num_locais; i++) {
         conjunto_visita[i+1] = locais[i];
     }
 
-    /* --- Exibir menu de escolha COM VALIDACAO --- */
+    /* Menu de escolha do modo de visualizacao */
     printf("\n  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
     printf("  |            Calculando Passeio (Parte 2)            |\n");
     printf("  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n");
@@ -348,17 +345,15 @@ void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades lo
     printf(" 1 - Detalhado (Trecho a trecho, com distancias)\n");
     printf(" 2 - Unificado (Fluxo continuo: Inicio -> v1 -> ... -> Fim)\n");
     
-    /* VALIDACAO DE ENTRADA */
     while (1) {
         printf("Opcao: ");
         scanf("%d", &modo_exibicao);
         
         if (modo_exibicao == 1 || modo_exibicao == 2) {
-            break; /* Entrada valida */
+            break; 
         } else {
             printf("\nOpcao invalida! Por favor, digite 1 ou 2.\n");
-            /* Limpa o buffer de entrada para evitar loop infinito caso digite letra */
-            while (getchar() != '\n'); 
+            while (getchar() != '\n'); /* Limpa buffer */
         }
     }
 
@@ -371,7 +366,7 @@ void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades lo
         printf("INICIO (%s)", conjunto_visita[0].nome);
     }
 
-    /* Algoritmo TSP (Vizinho Mais Proximo) */
+    /* Inicializacao do algoritmo do Vizinho Mais Proximo (TSP) */
     ordem_visita = (int*) malloc(num_visita * sizeof(int)); 
     visitados = (int*) calloc(num_visita, sizeof(int)); 
     
@@ -381,6 +376,7 @@ void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades lo
     
     distancia_total_passeio = 0;
 
+    /* Loop para encontrar o proximo local mais proximo */
     for (i = 1; i < num_visita; i++) { 
         
         melhor_dist_trecho = INT_MAX;
@@ -388,16 +384,12 @@ void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades lo
         melhor_caminho_trecho = NULL;
         tam_melhor_caminho_trecho = 0;
 
-        /* Busca vizinho mais proximo */
         for (k = 0; k < num_visita; k++) {
             if (visitados[k] == 0) { 
                 caminho_teste = NULL;
                 tam_caminho_teste = 0;
                 
-                dist_teste = getDistanciaEntrePOIs(G, ordem, 
-                                    conjunto_visita[local_atual_idx], 
-                                    conjunto_visita[k], 
-                                    &caminho_teste, &tam_caminho_teste);
+                dist_teste = getDistanciaEntrePOIs(G, ordem, conjunto_visita[local_atual_idx], conjunto_visita[k], &caminho_teste, &tam_caminho_teste);
                                     
                 if (dist_teste < melhor_dist_trecho) {
                     melhor_dist_trecho = dist_teste;
@@ -412,7 +404,7 @@ void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades lo
         }
         
         if (proximo_local_idx == -1) {
-            printf("\n\nERRO: Caminho interrompido.\n");
+            printf("\n\nERRO: Caminho interrompido (grafo desconexo ou erro logico).\n");
             if (melhor_caminho_trecho) free(melhor_caminho_trecho);
             break; 
         }
@@ -420,12 +412,11 @@ void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades lo
         loc_A = conjunto_visita[local_atual_idx];
         loc_B = conjunto_visita[proximo_local_idx];
 
-        /* --- IMPRESSAO --- */
+        /* Exibicao do trecho calculado */
         if (modo_exibicao == 1) {
             /* MODO DETALHADO */
             printf("\n%d. Trecho: %s -> %s\n", i, loc_A.nome, loc_B.nome);
             printf("   - Distancia: %d metros\n", melhor_dist_trecho);
-            /* Formato Start -> v... -> End */
             printf("   - Caminho: %s", loc_A.nome); 
             for(j = 0; j < tam_melhor_caminho_trecho; j++) {
                 printf(" -> v%d", melhor_caminho_trecho[j]);
@@ -457,7 +448,7 @@ void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades lo
         visitados[local_atual_idx] = 1;
     }
     
-    /* --- Volta para casa --- */
+    /* Retorno ao ponto de partida */
     caminho_final = NULL;
     tam_caminho_final = 0;
     dist_volta = getDistanciaEntrePOIs(G, ordem, 
@@ -476,7 +467,9 @@ void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades lo
             }
         }
         printf(" -> %s\n", conjunto_visita[0].nome);
-    } else {
+    }
+    
+    else {
         if (tam_caminho_final > 0) {
             printf(" -> v%d", caminho_final[0]);
         }
@@ -493,7 +486,7 @@ void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades lo
 
     distancia_total_passeio += dist_volta;
 
-    /* --- Exibir Resultado Final --- */
+    /* Exibicao dos Resultados Finais */
     printf("\n\n--------------------------------------------------------");
     printf("\nDistancia Total Percorrida: %d metros\n", distancia_total_passeio);
     
@@ -511,21 +504,22 @@ void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades lo
     free(visitados);
 }
 
-/* --- PARTE 2 --- */
-/* Funcao auxiliar para encontrar POIs:
-   Modo 1: Imprime (Passando por: Nome)
-   Modo 2: Imprime -> Nome
-*/
+/* * Funcao auxiliar para encontrar e imprimir POIs no meio do caminho.
+ * Modo 1: Imprime na mesma linha, conectado por setas (-> (Passando por: ...))
+ * Modo 2: Imprime simplificado (-> Nome)
+ */
 void encontrarPOIsNoCaminho(int v1, int v2, Localidades locais_todos[], int num_locais_todos, const char* nome_destino, int modo) {
     int i;
     for (i = 0; i < num_locais_todos; i++) {
+        /* Verifica se o POI esta na aresta [v1, v2] */
         if ((locais_todos[i].vert1 == v1 && locais_todos[i].vert2 == v2) ||
             (locais_todos[i].vert1 == v2 && locais_todos[i].vert2 == v1)) {
             
+            /* Evita duplicar o nome do destino final do trecho */
             if (strcmp(locais_todos[i].nome, nome_destino) != 0) {
                  if (modo == 1) {
-                     /* Detalhado */
-                     printf("\n     (Passando por: %s)", locais_todos[i].nome);
+                     /* Detalhado: Agora imprime na mesma linha */
+                     printf(" -> (Passando por: %s)", locais_todos[i].nome);
                  } else {
                      /* Unificado */
                      printf(" -> %s", locais_todos[i].nome);
@@ -536,17 +530,16 @@ void encontrarPOIsNoCaminho(int v1, int v2, Localidades locais_todos[], int num_
 }
 
 
-/*
- * =======================
- * FUNCAO MAIN
- * =======================
- */
+/* Main */
 int main(int argc, char *argv[]) {
-    /* Declaracoes no inicio (ANSI C) */
+
+    /* Declaracoes de variáveis */
     Vert *G;
     int ordemG = 50;
+    int num_locais;
+    int escolha;
+    char buffer_lixo;
     
-    /* Variaveis */
     Localidades minha_casa = {"Minha Casa", 22, 34, 15, 150};
     
     Localidades locais[] = {
@@ -571,17 +564,14 @@ int main(int argc, char *argv[]) {
         {"Bar do Gomes", 41, 42, 20, 90},
         {"Academia Smart Fit", 47, 48, 70, 80}
     };
-    
-    int num_locais;
-    int escolha;
-    char buffer_lixo;
 
-    /* Inicio do Codigo */
-    criaGrafo(&G, ordemG);
-    
     num_locais = sizeof(locais) / sizeof(locais[0]);
 
+    /* Criação do Grafo */
+    criaGrafo(&G, ordemG);
+
     /* Adicionando as arestas do mapa com distancias em METROS */
+    /* Adicionando primeiramente as arestas com pontos de interesse*/
     acrescentaAresta(G, ordemG, 1, 2, 120);     
     acrescentaAresta(G, ordemG, 2, 3, 110);     
     acrescentaAresta(G, ordemG, 5, 6, 115);     
@@ -681,8 +671,7 @@ int main(int argc, char *argv[]) {
     acrescentaAresta(G, ordemG, 27, 39, 165); 
     acrescentaAresta(G, ordemG, 39, 48, 165); 
     
-    
-    /* Loop principal do menu */
+    /* Loop do menu principal */
     while (1) {
         
         printf("\n      ++++++++++++++++++++++++++++++++++++++++\n");
@@ -704,12 +693,13 @@ int main(int argc, char *argv[]) {
         }
         
         else if(escolha == 2){
-            /* Chama a funcao principal da Parte 2 */
+            /* Chama a funcao que calcula o passeio por todos os pontos de interesse*/
             calcularPasseio(G, ordemG, minha_casa, locais, num_locais);
         }
 
         else if (escolha == 3) { 
             printf("\n--- Estrutura do Grafo (Lista de Adjacencia) ---\n");
+            /* Chama a função que imprime o grafo */
             imprimeGrafo(G, ordemG);
             printf("------------------------------------------------\n");
         }
