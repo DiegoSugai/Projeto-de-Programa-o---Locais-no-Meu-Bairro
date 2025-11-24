@@ -4,15 +4,11 @@
  * MODELAGEM DE BAIRRO E CALCULO DE PASSEIO
  * 
  * ----------------------------------------------
+ * 
  * Diego Spagnuolo Sugai - RA 10417329
  * Kaue Henrique Matias Alves - RA: 10417894
  * Victor Maki tarcha - RA 10419861
  * Marcos Arambasic - RA 10443260
- * ----------------------------------------------
- * 
- * INSTRUCOES PARA COMPILAR E RODAR (Ambiente Linux / WSL):
- * gcc Projeto.c -o programa -ansi -pedantic
- * ./programa
  * 
  * ----------------------------------------------
  */
