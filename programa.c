@@ -5,7 +5,7 @@
  * Diego Spagnuolo Sugai - RA 10417329
  * Kaue Henrique Matias Alves - RA: 10417894
  * Victor Maki tarcha - RA 10419861
- * Marcos Arambasic - RA 10443260
+ * Marcos Arambasic   - RA 10443260
  *
  */
 
@@ -594,7 +594,7 @@ void encontrarPOIsNoCaminho(int v1, int v2, Localidades locais_todos[], int num_
 /* Main */
 int main(int argc, char *argv[]) {
     Vert *G;
-    int ordemG = 50;
+    int ordemG = 49;
     int num_locais;
     int escolha;
     char buffer_lixo;
