@@ -5,8 +5,11 @@
  * Diego Spagnuolo Sugai - RA 10417329
  * Kaue Henrique Matias Alves - RA: 10417894
  * Victor Maki tarcha - RA 10419861
- * Marcos Arambasic   - RA 10443260
+ * Marcos Arambasic - RA 10443260
  *
+ * Para compilar e rodar:
+ * gcc programa.c -o programa -ansi -pedantic
+ * ./programa
  */
 
 /* Bibliotecas */
@@ -80,7 +83,7 @@ void destroiGrafo(Vert **G, int ordem){
         a = (*G)[i].prim;
         while (a!= NULL){
             n = a->prox;
-            free(a); /* Strings literais nao precisam de free */
+            free(a); 
             a = n;
         }
     }
@@ -110,7 +113,6 @@ int acrescentaAresta(Vert G[], int ordem, int vert1, int vert2, int peso){
     return 1;
 }
 
-/* Funcao para registrar o local dentro da estrutura do grafo */
 void adicionarLocalNaAresta(Vert G[], int v1, int v2, const char* nome) {
     Arest *a = G[v1].prim;
     while (a != NULL) {
@@ -120,7 +122,6 @@ void adicionarLocalNaAresta(Vert G[], int v1, int v2, const char* nome) {
         }
         a = a->prox;
     }
-    /* Faz o mesmo para o sentido inverso v2->v1 */
     a = G[v2].prim;
     while (a != NULL) {
         if (a->extremo2 == v1) {
@@ -152,7 +153,6 @@ void imprimeGrafo(Vert G[], int ordem){
     printf("\n\n");
 }
 
-/* Funcao para inicializar a topologia do bairro (Ruas/Arestas) */
 void inicializarMapa(Vert *G, int ordemG) {
     /* Ruas com Pontos de Interesse */
     acrescentaAresta(G, ordemG, 1, 2, 120);     
@@ -177,7 +177,7 @@ void inicializarMapa(Vert *G, int ordemG) {
     acrescentaAresta(G, ordemG, 47, 48, 150);   
     acrescentaAresta(G, ordemG, 22, 34, 150);   
     
-    /* Demais Ruas Horizontais */
+    /* Demais Ruas */
     acrescentaAresta(G, ordemG, 0, 1, 120); 
     acrescentaAresta(G, ordemG, 3, 4, 120); 
     acrescentaAresta(G, ordemG, 4, 5, 120); 
@@ -211,8 +211,6 @@ void inicializarMapa(Vert *G, int ordemG) {
     acrescentaAresta(G, ordemG, 44, 45, 120); 
     acrescentaAresta(G, ordemG, 45, 46, 120); 
     acrescentaAresta(G, ordemG, 46, 47, 120); 
-    
-    /* Demais Ruas Verticais */
     acrescentaAresta(G, ordemG, 0, 9, 165); 
     acrescentaAresta(G, ordemG, 18, 28, 80); 
     acrescentaAresta(G, ordemG, 28, 30, 80); 
@@ -241,7 +239,6 @@ void inicializarMapa(Vert *G, int ordemG) {
     acrescentaAresta(G, ordemG, 27, 39, 165); 
     acrescentaAresta(G, ordemG, 39, 48, 165);
 
-    /* Atribuicao dos locais nas arestas do grafo */
     adicionarLocalNaAresta(G, 1, 2, "Ecully Charbon");
     adicionarLocalNaAresta(G, 2, 3, "Tapecaria Renova");
     adicionarLocalNaAresta(G, 5, 6, "Gelato Borelli");
@@ -360,7 +357,6 @@ int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades po
     *melhor_caminho = NULL; 
     *tam_melhor_caminho = 0;
 
-    /* Cenario 1 */
     dist_vA1_vB1 = calculaDistanciaModificado(G, ordem, poi_A.vert1, poi_B.vert1, &caminho_atual, &tam_caminho_atual);
     if (dist_vA1_vB1 != INT_MAX) {
         dist_c1 = poi_A.dist_vert1 + dist_vA1_vB1 + poi_B.dist_vert1;
@@ -373,7 +369,6 @@ int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades po
     }
     caminho_atual = NULL;
 
-    /* Cenario 2 */
     dist_vA1_vB2 = calculaDistanciaModificado(G, ordem, poi_A.vert1, poi_B.vert2, &caminho_atual, &tam_caminho_atual);
      if (dist_vA1_vB2 != INT_MAX) {
         dist_c2 = poi_A.dist_vert1 + dist_vA1_vB2 + poi_B.dist_vert2;
@@ -386,7 +381,6 @@ int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades po
     }
     caminho_atual = NULL;
 
-    /* Cenario 3 */
     dist_vA2_vB1 = calculaDistanciaModificado(G, ordem, poi_A.vert2, poi_B.vert1, &caminho_atual, &tam_caminho_atual);
      if (dist_vA2_vB1 != INT_MAX) {
         dist_c3 = poi_A.dist_vert2 + dist_vA2_vB1 + poi_B.dist_vert1;
@@ -399,7 +393,6 @@ int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades po
     }
     caminho_atual = NULL;
 
-    /* Cenario 4 */
     dist_vA2_vB2 = calculaDistanciaModificado(G, ordem, poi_A.vert2, poi_B.vert2, &caminho_atual, &tam_caminho_atual);
      if (dist_vA2_vB2 != INT_MAX) {
         dist_c4 = poi_A.dist_vert2 + dist_vA2_vB2 + poi_B.dist_vert2;
@@ -414,10 +407,7 @@ int getDistanciaEntrePOIs(Vert G[], int ordem, Localidades poi_A, Localidades po
     return dist_total;
 }
 
-/* 
- * Funcao Principal da Parte 2:
- * Calcula o passeio usando a Heuristica do Vizinho Mais Proximo (TSP).
- */
+/* Funcao Principal: Calcula o passeio (TSP) */
 void calcularPasseio(Vert G[], int ordem, Localidades minha_casa, Localidades locais[], int num_locais) {
     
     int num_visita = num_locais + 1; 
@@ -597,6 +587,10 @@ int main(int argc, char *argv[]) {
     int ordemG = 49;
     int num_locais;
     int escolha;
+    int i; 
+    int *selecionados_indices;
+    int qtd_selecionados;
+    int local_idx;
     char buffer_lixo;
     
     Localidades minha_casa = {"Minha Casa", 22, 34, 15, 150};
@@ -634,8 +628,9 @@ int main(int argc, char *argv[]) {
         printf("      |                  MENU                |\n");
         printf("      ++++++++++++++++++++++++++++++++++++++++\n\n");
         printf("(1) Localizacao de minha casa\n");
-        printf("(2) Calcular passeio (PARTE 2)\n");
-        printf("(3) Imprimir Grafo Completo\n"); 
+        printf("(2) Calcular passeio com TODOS os locais\n");
+        printf("(3) Escolher locais especificos para o passeio\n");
+        printf("(4) Imprimir Grafo Completo\n"); 
         printf("(0) Fechar programa\n\n");
         
         printf("Digite uma opcao: ");
@@ -646,8 +641,43 @@ int main(int argc, char *argv[]) {
             printf("A %d metros de V%d e %d metros de V%d.\n", minha_casa.dist_vert1, minha_casa.vert1, minha_casa.dist_vert2, minha_casa.vert2);
             printf("\n--------------------------------------------------------\n\n");
         }
-        else if(escolha == 2) calcularPasseio(G, ordemG, minha_casa, locais, num_locais);
-        else if (escolha == 3) { 
+        else if(escolha == 2) {
+            calcularPasseio(G, ordemG, minha_casa, locais, num_locais);
+        }
+        else if(escolha == 3) {
+            printf("\n--- Lista de Locais Disponiveis ---\n");
+            for(i = 0; i < num_locais; i++) {
+                printf("[%d] %s\n", i+1, locais[i].nome);
+            }
+            
+            printf("\nQuantos locais voce deseja visitar? ");
+            scanf("%d", &qtd_selecionados);
+            
+            if (qtd_selecionados > 0 && qtd_selecionados <= num_locais) {
+                Localidades *locais_escolhidos = (Localidades*) malloc(qtd_selecionados * sizeof(Localidades));
+                selecionados_indices = (int*) malloc(qtd_selecionados * sizeof(int));
+                
+                for(i = 0; i < qtd_selecionados; i++) {
+                    printf("Digite o numero do %d local: ", i+1);
+                    scanf("%d", &local_idx);
+                    if(local_idx > 0 && local_idx <= num_locais) {
+                        locais_escolhidos[i] = locais[local_idx - 1];
+                    } else {
+                        printf("Codigo invalido. Tente novamente.\n");
+                        i--; 
+                    }
+                }
+                
+                /* Chama a funcao de passeio com o vetor personalizado */
+                calcularPasseio(G, ordemG, minha_casa, locais_escolhidos, qtd_selecionados);
+                
+                free(locais_escolhidos);
+                free(selecionados_indices);
+            } else {
+                printf("Quantidade invalida.\n");
+            }
+        }
+        else if (escolha == 4) { 
             printf("\n--- Estrutura do Grafo (Lista de Adjacencia) ---\n");
             imprimeGrafo(G, ordemG);
             printf("------------------------------------------------\n");
